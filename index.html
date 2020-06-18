@@ -6,8 +6,6 @@
     <title>画板</title>
     <link rel="stylesheet" href="style.css">
 </head>
-
-
 <body>
     <canvas id="canvas" width="100" height ="100"></canvas>
     <script>
@@ -15,26 +13,54 @@
         canvas.width = document.documentElement.clientWidth;
         canvas.height = document.documentElement.clientHeight;
         let ctx = canvas.getContext("2d");
+        ctx.fillStyle = "black";
+        ctx.strokeStyle ='black';//描边颜色
+        ctx.lineWidth =4;//描边样式加粗//ctx.lineJoin="round";//节点之间变圆，空隙是有缺口；
+        ctx.lineCap="round";//节点空隙变圆
+        
         let painting = false
-        ctx.fillStyle="black";
-        ctx.strokeStyle ='none';
-        canvas.onmousedown = () => {
-            painting = true
-        }
-        canvas.onmousemove = (e)=>{
-            if(painting === true){
-                ctx.beginPath();
-                ctx.arc(e.clientX,e.clientY, 10,0,2 * Math.PI);
-                ctx.stroke();
-                ctx.fill();
-            } else {
-                console.log('什么都不做')
+        let last//声明一个last变量
+        
+        var isTouchDevice ='ontouchstart' in document.documentElement;
+        if(isTouchDevice){
+            canvas.ontouchstart =(e)=>{
+                let x = e.touches[0].clientX
+                let y = e.touches[0].clientY
+                last=[x, y] 
             }
-            
+            canvas.ontouchmove =(e) => {
+                let x = e.touches[0].clientX
+                let y = e.touches[0].clientY
+                drawLine(last[0], last[1], x, y)
+                last=[x, y]
+
+            }
+
+        }else {
+             canvas.onmousedown = (e) => {
+                painting = true
+                last = [e.clientX,e.clientY]//把这个点作为上一次的点
+            }
+            canvas.onmousemove = (e) => {
+
+                if (painting === true) {
+                    drawLine(last[0], last[1], e.clientX, e.clientY)
+                    last=[e.clientX,e.clientY]//实时更新上一次变量
+                } 
+            }
+            canvas.onmouseup = () => {
+                painting = false
+            }        
         }
-        canvas.onmouseup = () => {
-            painting = false
-        }        
+        function drawLine(x1, y1, x2, y2) {
+                ctx.beginPath();
+                ctx.moveTo(x1, y1);//第一个坐标
+                ctx.lineTo(x2, y2);//第二个坐标
+                ctx.stroke();//描边
+            }
+
+         
+       
     </script>
 
 
